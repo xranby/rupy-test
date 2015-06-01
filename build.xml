@@ -1,0 +1,47 @@
+<!-- http://snipplr.com/view/58419/minimal-apache-ant-buildxml/ + https://github.com/tinspin/rupy/wiki/Tutorial#remote -->
+<project name="MyRupyProject" basedir="." default="main">
+ 
+    <property name="lib.dir"     value="lib"/>
+ 
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+ 
+    <property name="src.dir"     value="src"/>
+ 
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir"     value="${build.dir}/jar"/>
+ 
+    <property name="main-class"  value="Hello"/>
+ 
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+ 
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+    </target>
+ 
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+ 
+    <target name="clean-build" depends="clean,jar"/>
+ 
+    <target name="main" depends="clean,jar,deploy"/>
+
+    <target name="deploy" depends="jar">
+        <java fork="yes" classname="se.rupy.http.Deploy" classpath="lib/http.jar">
+            <arg line="localhost:8000"/>
+            <arg line="${jar.dir}/${ant.project.name}.jar"/>
+            <arg line="secret"/><!-- see run.bat and run.sh -->
+        </java>
+    </target>
+</project>
